@@ -48,6 +48,13 @@ const getAllCategory = async (
         : {
             created_at: 'desc',
           },
+    include: {
+      _count: {
+        select: {
+          posts: true,
+        },
+      },
+    },
   });
   const total = await prisma.category.count({
     where: whereConditons,
@@ -59,10 +66,12 @@ const getAllCategory = async (
       limit,
       total,
     },
-    data: result,
+    data: result.map((category) => ({
+      ...category,
+      postCount: category._count.posts,
+    })),
   };
 };
-
 const getSingleCategory = async (id: string): Promise<Category | null> => {
   const result = await prisma.category.findUnique({
     where: {
