@@ -1,4 +1,4 @@
-import { Category, Prisma } from '@prisma/client';
+import { Category, Post, Prisma } from '@prisma/client';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
@@ -66,7 +66,7 @@ const getAllCategory = async (
       limit,
       total,
     },
-    data: result.map((category) => ({
+    data: result.map(category => ({
       ...category,
       postCount: category._count.posts,
     })),
@@ -79,6 +79,46 @@ const getSingleCategory = async (id: string): Promise<Category | null> => {
     },
   });
   return result;
+};
+
+const getPostsByCategoryId = async (
+  categoryId: string,
+  options: IPaginationOptions
+): Promise<IGenericResponse<Post[]>> => {
+  const { page, limit, skip } = paginationHelpers.calculatePagination(options);
+
+  const result = await prisma.post.findMany({
+    skip,
+    take: limit,
+    where: {
+      category_id: categoryId,
+    },
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            created_at: 'desc',
+          },
+    include: {
+      category: true,
+    },
+  });
+  const total = await prisma.post.count({
+    where: {
+      category_id: categoryId,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const updateCategory = async (
@@ -106,6 +146,7 @@ const deleteCategory = async (id: string): Promise<Category> => {
 export const CategoryService = {
   createCategory,
   getAllCategory,
+  getPostsByCategoryId,
   getSingleCategory,
   updateCategory,
   deleteCategory,

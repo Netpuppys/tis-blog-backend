@@ -29,6 +29,19 @@ const getAllCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getPostsByCategoryId = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const result = await CategoryService.getPostsByCategoryId(id, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Posts fetched successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 const getSingleCategory = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await CategoryService.getSingleCategory(id);
@@ -65,6 +78,7 @@ const deleteCategory = catchAsync(async (req: Request, res: Response) => {
 export const CategoryController = {
   createCategory,
   getAllCategory,
+  getPostsByCategoryId,
   getSingleCategory,
   updateCategory,
   deleteCategory,

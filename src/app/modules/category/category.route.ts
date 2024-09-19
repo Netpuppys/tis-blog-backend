@@ -1,12 +1,14 @@
 import express from 'express';
 import validateRequest from '../../middlewares/validateRequest';
-import { CategoryValidation } from './category.validation';
 import { CategoryController } from './category.controller';
+import { CategoryValidation } from './category.validation';
 
 const router = express.Router();
 
 router.get('/', CategoryController.getAllCategory);
 router.get('/:id', CategoryController.getSingleCategory);
+
+router.get('/:id/posts', CategoryController.getPostsByCategoryId);
 
 router.post(
   '/create-category',
