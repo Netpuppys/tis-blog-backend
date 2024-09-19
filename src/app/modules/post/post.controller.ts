@@ -30,8 +30,8 @@ const getAllPost = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSinglePost = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await PostService.getSinglePost(id);
+  const { slug } = req.params;
+  const result = await PostService.getSinglePost(slug);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

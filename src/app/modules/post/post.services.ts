@@ -66,10 +66,10 @@ const getAllPost = async (
   };
 };
 
-const getSinglePost = async (id: string): Promise<Post | null> => {
+const getSinglePost = async (slug: string): Promise<Post | null> => {
   const result = await prisma.post.findUnique({
     where: {
-      id,
+      slug,
     },
     include: {
       category: true,
@@ -107,4 +107,3 @@ export const PostService = {
   updatePost,
   deletePost,
 };
-

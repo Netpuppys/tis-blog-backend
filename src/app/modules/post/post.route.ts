@@ -6,7 +6,7 @@ import { PostValidation } from './post.validation';
 const router = express.Router();
 
 router.get('/', PostController.getAllPost);
-router.get('/:id', PostController.getSinglePost);
+router.get('/:slug', PostController.getSinglePost);
 
 router.post(
   '/create-post',
