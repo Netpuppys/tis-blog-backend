@@ -29,6 +29,9 @@ const createZodPost = z.object({
     tags: z.array(z.string()).nonempty({
       message: 'Tags should contain at least one tag',
     }),
+    meta_keywords: z.array(z.string()).nonempty({
+      message: 'Meta keywords should contain at least one keyword',
+    }),
   }),
 });
 

@@ -36,6 +36,7 @@ model Post {
   banner_img        String
   content           String
   tags              String[]
+  meta_keywords     String[]
   short_description String
   meta_description  String
   author_name       String
