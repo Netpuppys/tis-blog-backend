@@ -33,13 +33,14 @@ model Category {
 model Post {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   title             String
+  meta_title        String
   banner_img        String
   content           String
-  tags              String[]
-  meta_keywords     String[]
-  short_description String
-  meta_description  String
-  author_name       String
+  tags              String[] //optional
+  meta_keywords     String[] //optional
+  short_description String? //optional
+  meta_description  String? //optional
+  author_name       String? //optional
   slug              String   @unique
 
   category_id String?   @db.ObjectId
