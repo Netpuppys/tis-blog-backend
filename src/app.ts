@@ -3,35 +3,25 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import routes from './app/routes';
+
 import cookieParser from 'cookie-parser';
 
 const app: Application = express();
 
-// ✅ CORS setup
-app.use(
-  cors({
-    origin: [
-      'https://tis.edu.in',          // main website
-      'https://www.tis.edu.in',      // in case www is used
-      'https://blogadmin.tis.edu.in' // admin panel
-    ],
-    credentials: true,
-  })
-);
-
+app.use(cors());
 app.use(cookieParser());
 
-// ✅ Parsers
+//parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Routes
 app.use('/api/v1', routes);
 
-// ✅ Global error handler
+
+//global error handler
 app.use(globalErrorHandler);
 
-// ✅ Handle not found
+//handle not found
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(httpStatus.NOT_FOUND).json({
     success: false,
