@@ -75,7 +75,7 @@ const getSinglePost = async (slug: string): Promise<Post | null> => {
   const cleanSlug = normalizeSlug(slug);
   // Match either a clean slug or one that was saved with a trailing slash
   // (legacy bad data), so already-broken posts resolve without a DB fix.
-  const result = await prisma.post.findFirst({
+  let result = await prisma.post.findFirst({
     where: {
       OR: [{ slug: cleanSlug }, { slug: `${cleanSlug}/` }],
     },
@@ -83,6 +83,15 @@ const getSinglePost = async (slug: string): Promise<Post | null> => {
       category: true,
     },
   });
+
+  // Fallback: some legacy posts have stray internal/leading/trailing
+  // whitespace baked into the slug (e.g. "vm cm "). Scan and compare
+  // normalized values so these still resolve instead of 404ing forever.
+  if (!result) {
+    const all = await prisma.post.findMany({ include: { category: true } });
+    result = all.find(post => normalizeSlug(post.slug) === cleanSlug) || null;
+  }
+
   return result;
 };
 
