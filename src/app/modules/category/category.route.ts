@@ -1,14 +1,16 @@
 import express from 'express';
+import { publicCache } from '../../middlewares/publicCache';
 import validateRequest from '../../middlewares/validateRequest';
 import { CategoryController } from './category.controller';
 import { CategoryValidation } from './category.validation';
 
 const router = express.Router();
 
-router.get('/', CategoryController.getAllCategory);
-router.get('/:id', CategoryController.getSingleCategory);
+// Public, identical-for-every-visitor reads -> safe to cache at the CDN.
+router.get('/', publicCache(), CategoryController.getAllCategory);
+router.get('/:id', publicCache(), CategoryController.getSingleCategory);
 
-router.get('/:id/posts', CategoryController.getPostsByCategoryId);
+router.get('/:id/posts', publicCache(), CategoryController.getPostsByCategoryId);
 
 router.post(
   '/create-category',
