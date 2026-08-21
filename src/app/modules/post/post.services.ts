@@ -87,9 +87,36 @@ const getSinglePost = async (slug: string): Promise<Post | null> => {
   // Fallback: some legacy posts have stray internal/leading/trailing
   // whitespace baked into the slug (e.g. "vm cm "). Scan and compare
   // normalized values so these still resolve instead of 404ing forever.
+  //
+  // IMPORTANT: this scan must stay CHEAP.
+  //
+  // It previously ran `findMany({ include: { category: true } })`, which
+  // loaded every post -- including each post's full `content` HTML -- and
+  // every category into memory on EVERY slug miss. Because /:slug is a
+  // public endpoint, each 404 dumped the whole database. Vulnerability
+  // scanners probing /api/v1/post/.env, /wp-login.php, /graphql etc.
+  // generated hundreds of those a day, each running until the 15s Vercel
+  // timeout. That was ~50% of all function duration and the bulk of the
+  // Fast Origin Transfer bill.
+  //
+  // Now we select only { id, slug } -- kilobytes rather than megabytes --
+  // and re-fetch just the one matching post in full. Same behaviour,
+  // bounded cost.
   if (!result) {
-    const all = await prisma.post.findMany({ include: { category: true } });
-    result = all.find(post => normalizeSlug(post.slug) === cleanSlug) || null;
+    const candidates = await prisma.post.findMany({
+      select: { id: true, slug: true },
+    });
+
+    const match = candidates.find(
+      post => normalizeSlug(post.slug) === cleanSlug
+    );
+
+    result = match
+      ? await prisma.post.findUnique({
+          where: { id: match.id },
+          include: { category: true },
+        })
+      : null;
   }
 
   return result;
